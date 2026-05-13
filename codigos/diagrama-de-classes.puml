@@ -1,0 +1,130 @@
+@startuml diagrama-de-classes
+' Sistema de Gestao das Olimpiadas (SGO)
+' Diagrama de Classes
+
+title Sistema de Gestao das Olimpiadas (SGO) - Diagrama de Classes
+
+skinparam classAttributeIconSize 0
+skinparam classFontStyle bold
+hide circle
+
+enum TipoMedalha {
+  OURO
+  PRATA
+  BRONZE
+}
+
+enum StatusCompeticao {
+  AGENDADA
+  EM_ANDAMENTO
+  ENCERRADA
+  CANCELADA
+}
+
+enum StatusInscricao {
+  PENDENTE
+  CONFIRMADA
+  RECUSADA
+}
+
+class Pais {
+  - codigo : String
+  - nome : String
+  - sigla : String
+  + listarAtletas() : List<Atleta>
+  + totalMedalhas() : int
+}
+
+class Atleta {
+  - id : Long
+  - nome : String
+  - dataNascimento : Date
+  - genero : String
+  + inscrever(c : Competicao) : Inscricao
+  + listarCompeticoes() : List<Competicao>
+}
+
+class Modalidade {
+  - id : Long
+  - nome : String
+  - descricao : String
+  - categoria : String
+}
+
+class Local {
+  - id : Long
+  - nome : String
+  - endereco : String
+  - capacidade : int
+  + estaDisponivel(data : DateTime) : boolean
+}
+
+class Competicao {
+  - id : Long
+  - dataHora : DateTime
+  - status : StatusCompeticao
+  + adicionarInscricao(i : Inscricao) : void
+  + registrarResultado(r : Resultado) : void
+  + listarClassificacao() : List<Resultado>
+}
+
+class Inscricao {
+  - id : Long
+  - dataInscricao : Date
+  - status : StatusInscricao
+  + confirmar() : void
+  + cancelar() : void
+}
+
+class Resultado {
+  - id : Long
+  - posicao : int
+  - tempoOuPontuacao : String
+  - medalha : TipoMedalha
+  + atribuirMedalha() : TipoMedalha
+}
+
+class RelatorioMedalhas {
+  + gerarPorPais(p : Pais) : Relatorio
+  + gerarQuadroGeral() : Relatorio
+  + exportarPDF() : File
+}
+
+class Usuario {
+  - id : Long
+  - login : String
+  - senha : String
+  - perfil : String
+  + autenticar() : boolean
+}
+
+' --- Relacionamentos ---
+Pais "1" <-- "0..*" Atleta : representa >
+Modalidade "1" <-- "0..*" Competicao : referente a >
+Local "1" <-- "0..*" Competicao : ocorre em >
+Competicao "0..*" -- "0..*" Atleta : participa
+(Competicao, Atleta) .. Inscricao
+Competicao "1" -- "0..3" Resultado : possui >
+Resultado "0..*" --> "1" Atleta : conquistado por >
+RelatorioMedalhas ..> Pais : consulta >
+RelatorioMedalhas ..> Resultado : agrega >
+
+note bottom of Inscricao
+  Restricao (RN2):
+  Um Atleta so pode representar
+  UM Pais por Modalidade.
+end note
+
+note bottom of Local
+  Restricao (RN3):
+  Um Local nao pode abrigar duas
+  Competicoes no mesmo horario.
+end note
+
+note bottom of Resultado
+  Restricao (RN4):
+  Apenas tres posicoes por Competicao:
+  1o (ouro), 2o (prata), 3o (bronze).
+end note
+
+@enduml

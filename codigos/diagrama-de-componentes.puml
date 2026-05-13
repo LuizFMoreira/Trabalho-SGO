@@ -1,0 +1,79 @@
+@startuml diagrama-de-componentes
+' Sistema de Gestao das Olimpiadas (SGO)
+' Diagrama de Componentes
+
+title Sistema de Gestao das Olimpiadas (SGO) - Diagrama de Componentes
+
+skinparam componentStyle rectangle
+skinparam packageStyle rectangle
+skinparam component {
+  BackgroundColor #FEFECE
+  BorderColor     #555555
+}
+skinparam database {
+  BackgroundColor #DDEEFF
+  BorderColor     #555555
+}
+skinparam cloud {
+  BackgroundColor #F5E8FA
+  BorderColor     #555555
+}
+
+' --- Camada de apresentacao ---
+package "Cliente" {
+  [Interface de Usuario\n(Web / Mobile)] as UI
+}
+
+' --- Camada de aplicacao (modulos do servidor) ---
+package "Servidor de Aplicacao SGO" {
+  component "Modulo de\nAutenticacao" as Auth
+  component "Modulo de\nCompeticoes"  as Comp
+  component "Modulo de\nInscricoes"   as Insc
+  component "Modulo de\nAlocacao"     as Aloc
+  component "Modulo de\nResultados"   as Res
+  component "Modulo de\nRelatorios"   as Rel
+}
+
+' --- Recursos de infraestrutura ---
+database "Banco de Dados\nSGO (PostgreSQL)" as DB
+cloud    "Servico de Email\n(SMTP externo)"  as Email
+
+' --- UI -> modulos (interfaces consumidas) ---
+UI --> Auth : <<use>> IAutenticacao
+UI --> Comp : <<use>> ICompeticao
+UI --> Insc : <<use>> IInscricao
+UI --> Aloc : <<use>> IAlocacao
+UI --> Res  : <<use>> IResultado
+UI --> Rel  : <<use>> IRelatorio
+
+' --- Dependencias internas (modulo -> modulo) ---
+Comp ..> Aloc : reserva local
+Insc ..> Comp : valida evento
+Res  ..> Comp : associa resultado
+Rel  ..> Res  : agrega medalhas
+
+' --- Persistencia ---
+Auth --> DB : JDBC
+Comp --> DB : JDBC
+Insc --> DB : JDBC
+Aloc --> DB : JDBC
+Res  --> DB : JDBC
+Rel  --> DB : JDBC
+
+' --- Notificacoes externas ---
+Insc ..> Email : envia confirmacao
+Res  ..> Email : envia resultado
+
+note right of Rel
+  Gera relatorios de medalhas
+  por pais (ouro/prata/bronze)
+  e o quadro geral.
+end note
+
+note right of Aloc
+  Impede conflito de horario:
+  um local so abriga uma
+  competicao por vez.
+end note
+
+@enduml

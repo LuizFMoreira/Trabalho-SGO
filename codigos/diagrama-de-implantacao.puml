@@ -1,0 +1,61 @@
+@startuml diagrama-de-implantacao
+' Sistema de Gestao das Olimpiadas (SGO)
+' Diagrama de Implantacao
+
+title Sistema de Gestao das Olimpiadas (SGO) - Diagrama de Implantacao
+
+skinparam shadowing false
+
+node "Dispositivo do Usuario\n<<device>>" as Cliente {
+  artifact "Navegador Web\n(Chrome / Firefox / Edge)" as Browser
+  artifact "App Mobile SGO\n(Android / iOS)" as AppMobile
+}
+
+cloud "Internet" as Net
+
+node "Servidor Web / Proxy Reverso\n<<device>>" as ProxyNode {
+  artifact "Nginx" as Nginx
+}
+
+node "Servidor de Aplicacao SGO\n<<device>>" as AppServer {
+  node "Docker / JVM\n<<execution environment>>" as Runtime {
+    artifact "sgo-api.jar\n(Spring Boot)" as Api
+    artifact "sgo-web.war\n(Frontend SSR)" as Web
+  }
+}
+
+node "Servidor de Banco de Dados\n<<device>>" as DBServer {
+  node "PostgreSQL 16\n<<execution environment>>" as Pg {
+    database "sgo_db" as DB
+  }
+}
+
+node "Servidor de Relatorios\n<<device>>" as RelServer {
+  artifact "relatorios-service\n(gerador de PDF)" as RelArt
+}
+
+cloud "Servico de Email\n(SMTP externo)" as SMTP
+
+' --- Conexoes ---
+Browser --> Net : HTTPS
+AppMobile --> Net : HTTPS
+Net --> Nginx : HTTPS (443)
+Nginx --> Api : HTTP (8080)
+Nginx --> Web : HTTP (8081)
+Api --> DB : JDBC / TCP 5432
+Api --> RelArt : REST (HTTP)
+RelArt --> DB : JDBC / TCP 5432
+Api --> SMTP : SMTP (587)
+
+note right of AppServer
+  Hospeda a API REST e o
+  front-end do SGO em container.
+end note
+
+note right of DBServer
+  Armazena competicoes, atletas,
+  paises, locais, inscricoes,
+  resultados e medalhas.
+end note
+
+@enduml

@@ -1,0 +1,87 @@
+@startuml diagrama-de-caso-de-uso
+' Sistema de Gestao das Olimpiadas (SGO)
+' Diagrama de Caso de Uso
+
+title Sistema de Gestao das Olimpiadas (SGO) - Diagrama de Caso de Uso
+
+left to right direction
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+skinparam usecase {
+  BackgroundColor #FEFECE
+  BorderColor #555555
+}
+
+actor "Administrador" as Admin
+actor "Atleta" as Atleta
+actor "Arbitro/Juiz" as Arbitro
+actor "Publico" as Publico
+
+rectangle "Sistema de Gestao das Olimpiadas (SGO)" {
+
+  usecase "UC01\nAutenticar Usuario" as UC01
+  usecase "UC02\nCadastrar Atleta/Pais" as UC02
+  usecase "UC03\nCadastrar Competicao" as UC03
+  usecase "UC04\nEditar/Cancelar Competicao" as UC04
+  usecase "UC05\nAlocar Local" as UC05
+  usecase "UC06\nVerificar Conflito\nde Horario" as UC06
+  usecase "UC07\nInscrever Atleta" as UC07
+  usecase "UC08\nValidar Inscricao\n(1 pais por modalidade)" as UC08
+  usecase "UC09\nRegistrar Resultado\n(1o, 2o e 3o lugar)" as UC09
+  usecase "UC10\nAtualizar Quadro\nde Medalhas" as UC10
+  usecase "UC11\nGerar Relatorio\nde Medalhas" as UC11
+  usecase "UC12\nConsultar Programacao" as UC12
+  usecase "UC13\nConsultar Quadro\nde Medalhas" as UC13
+}
+
+' --- Associacoes dos atores ---
+Admin --> UC02
+Admin --> UC03
+Admin --> UC04
+Admin --> UC05
+Admin --> UC11
+
+Atleta --> UC07
+Atleta --> UC12
+
+Arbitro --> UC09
+
+Publico --> UC12
+Publico --> UC13
+
+' --- Relacionamentos entre casos de uso (apenas os essenciais p/ legibilidade) ---
+UC03 ..> UC05 : <<include>>
+UC05 ..> UC06 : <<include>>
+UC07 ..> UC08 : <<include>>
+UC09 ..> UC10 : <<include>>
+UC11 ..> UC10 : <<include>>
+UC04 ..> UC03 : <<extend>>
+
+' Autenticacao como pre-condicao geral (representada por uma generalizacao para evitar poluicao)
+UC03 ..> UC01 : <<include>>
+UC07 ..> UC01 : <<include>>
+UC09 ..> UC01 : <<include>>
+
+note bottom of UC08
+  RN2: Cada atleta so pode
+  representar UM pais em
+  cada modalidade.
+end note
+
+note bottom of UC06
+  RN3: Um local nao pode
+  abrigar duas competicoes
+  no mesmo horario.
+end note
+
+note bottom of UC09
+  RN4: Apenas tres posicoes
+  por competicao (1o, 2o e 3o).
+end note
+
+note bottom of UC11
+  RN5: Relatorios de medalhas
+  por pais (ouro/prata/bronze).
+end note
+
+@enduml

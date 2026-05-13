@@ -1,0 +1,89 @@
+@startuml diagrama-de-pacotes
+' Sistema de Gestao das Olimpiadas (SGO)
+' Diagrama de Pacotes (Arquitetura em Camadas)
+
+title Sistema de Gestao das Olimpiadas (SGO) - Diagrama de Pacotes
+
+skinparam packageStyle folder
+skinparam package {
+  BackgroundColor<<UI>>      #E8F1FA
+  BackgroundColor<<APP>>     #E8F8E8
+  BackgroundColor<<DOM>>     #FFF7D6
+  BackgroundColor<<INFRA>>   #F5E8FA
+  BorderColor                #555555
+}
+top to bottom direction
+
+package "br.pucminas.sgo.apresentacao" <<UI>> as Apresentacao {
+  class CompeticaoView
+  class InscricaoView
+  class ResultadoView
+  class RelatorioView
+  class LoginView
+}
+
+package "br.pucminas.sgo.aplicacao" <<APP>> as Aplicacao {
+  class CompeticaoService
+  class InscricaoService
+  class AlocacaoService
+  class ResultadoService
+  class RelatorioService
+  class AutenticacaoService
+}
+
+package "br.pucminas.sgo.dominio" <<DOM>> as Dominio {
+  class Competicao
+  class Atleta
+  class Pais
+  class Local
+  class Modalidade
+  class Inscricao
+  class Resultado
+  class RelatorioMedalhas
+  class Usuario
+}
+
+package "br.pucminas.sgo.infraestrutura" <<INFRA>> as Infraestrutura {
+  package "persistencia" <<INFRA>> as Persistencia {
+    class CompeticaoRepository
+    class AtletaRepository
+    class PaisRepository
+    class LocalRepository
+    class ResultadoRepository
+    class UsuarioRepository
+  }
+  package "integracao" <<INFRA>> as Integracao {
+    class GeradorPDF
+    class ServicoEmail
+  }
+}
+
+' --- Dependencias entre camadas (unidirecionais) ---
+Apresentacao   ..> Aplicacao       : <<use>>
+Aplicacao      ..> Dominio         : <<use>>
+Aplicacao      ..> Infraestrutura  : <<delegate>>
+Infraestrutura ..> Dominio         : <<map>>
+
+note right of Apresentacao
+  Camada de UI (Web / Mobile).
+  Acessa o sistema atraves dos
+  servicos da camada Aplicacao.
+end note
+
+note right of Aplicacao
+  Camada de servicos / casos de uso.
+  Orquestra as regras do dominio.
+end note
+
+note right of Dominio
+  Camada de regras de negocio.
+  Nucleo do sistema - nao depende
+  das demais camadas.
+end note
+
+note right of Infraestrutura
+  Persistencia (JDBC/JPA) e
+  integracoes externas (PDF, e-mail).
+end note
+
+@enduml

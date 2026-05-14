@@ -11,77 +11,87 @@ skinparam usecase {
   BackgroundColor #FEFECE
   BorderColor #555555
 }
+skinparam linetype polyline
 
 actor "Administrador" as Admin
-actor "Atleta" as Atleta
-actor "Arbitro/Juiz" as Arbitro
-actor "Publico" as Publico
+actor "Arbitro/Juiz"  as Arbitro
+actor "Atleta"        as Atleta
+actor "Publico"       as Publico
 
 rectangle "Sistema de Gestao das Olimpiadas (SGO)" {
 
-  usecase "UC01\nAutenticar Usuario" as UC01
-  usecase "UC02\nCadastrar Atleta/Pais" as UC02
-  usecase "UC03\nCadastrar Competicao" as UC03
-  usecase "UC04\nEditar/Cancelar Competicao" as UC04
-  usecase "UC05\nAlocar Local" as UC05
-  usecase "UC06\nVerificar Conflito\nde Horario" as UC06
-  usecase "UC07\nInscrever Atleta" as UC07
-  usecase "UC08\nValidar Inscricao\n(1 pais por modalidade)" as UC08
-  usecase "UC09\nRegistrar Resultado\n(1o, 2o e 3o lugar)" as UC09
-  usecase "UC10\nAtualizar Quadro\nde Medalhas" as UC10
-  usecase "UC11\nGerar Relatorio\nde Medalhas" as UC11
-  usecase "UC12\nConsultar Programacao" as UC12
-  usecase "UC13\nConsultar Quadro\nde Medalhas" as UC13
+  ' --- Grupo: Gestao de Competicoes (Administrador) ---
+  usecase "UC01\nCadastrar Competicao"        as UC01
+  usecase "UC02\nEditar/Cancelar\nCompeticao" as UC02
+  usecase "UC03\nAlocar Local"                as UC03
+  usecase "UC04\nCadastrar Atleta/Pais"       as UC04
+
+  ' --- Grupo: Inscricoes (Atleta) ---
+  usecase "UC05\nInscrever Atleta"            as UC05
+  usecase "UC06\nValidar Inscricao"           as UC06
+
+  ' --- Grupo: Resultados (Arbitro) ---
+  usecase "UC07\nRegistrar Resultado"         as UC07
+  usecase "UC08\nAtualizar Quadro\nde Medalhas" as UC08
+
+  ' --- Grupo: Consultas (Publico) ---
+  usecase "UC09\nConsultar Programacao"       as UC09
+  usecase "UC10\nConsultar Quadro\nde Medalhas" as UC10
+  usecase "UC11\nGerar Relatorio\nde Medalhas"  as UC11
 }
 
-' --- Associacoes dos atores ---
-Admin --> UC02
-Admin --> UC03
-Admin --> UC04
-Admin --> UC05
-Admin --> UC11
+' === Associacoes Ator -> UC (mantidas curtas para evitar cruzamentos) ===
+Admin   --> UC01
+Admin   --> UC02
+Admin   --> UC03
+Admin   --> UC04
+Admin   --> UC11
 
-Atleta --> UC07
-Atleta --> UC12
+Atleta  --> UC05
+Atleta  --> UC09
 
-Arbitro --> UC09
+Arbitro --> UC07
 
-Publico --> UC12
-Publico --> UC13
+Publico --> UC09
+Publico --> UC10
 
-' --- Relacionamentos entre casos de uso (apenas os essenciais p/ legibilidade) ---
-UC03 ..> UC05 : <<include>>
+' === Relacionamentos entre UCs (apenas os essenciais ao enunciado) ===
+UC02 ..> UC01 : <<extend>>
+UC01 ..> UC03 : <<include>>
 UC05 ..> UC06 : <<include>>
 UC07 ..> UC08 : <<include>>
-UC09 ..> UC10 : <<include>>
-UC11 ..> UC10 : <<include>>
-UC04 ..> UC03 : <<extend>>
 
-' Autenticacao como pre-condicao geral (representada por uma generalizacao para evitar poluicao)
-UC03 ..> UC01 : <<include>>
-UC07 ..> UC01 : <<include>>
-UC09 ..> UC01 : <<include>>
-
-note bottom of UC08
-  RN2: Cada atleta so pode
-  representar UM pais em
-  cada modalidade.
-end note
-
-note bottom of UC06
+' === Notas de Regras de Negocio (ancoradas no UC correspondente) ===
+note right of UC03
   RN3: Um local nao pode
   abrigar duas competicoes
   no mesmo horario.
 end note
 
-note bottom of UC09
-  RN4: Apenas tres posicoes
-  por competicao (1o, 2o e 3o).
+note right of UC06
+  RN2: Cada atleta so pode
+  representar UM pais por
+  modalidade.
 end note
 
-note bottom of UC11
-  RN5: Relatorios de medalhas
-  por pais (ouro/prata/bronze).
+note right of UC07
+  RN4: Apenas tres posicoes
+  por competicao
+  (1o ouro, 2o prata, 3o bronze).
+end note
+
+note right of UC11
+  RN5: Relatorios por pais
+  com totais de ouro,
+  prata e bronze.
+end note
+
+' === Autenticacao representada como pre-condicao textual (evita 4 linhas cruzadas) ===
+note bottom
+  **Pre-condicao geral:** os atores
+  Administrador, Atleta e Arbitro
+  devem estar autenticados no sistema
+  para executar UCs restritos (UC01-UC08, UC11).
 end note
 
 @enduml

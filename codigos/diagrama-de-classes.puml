@@ -94,8 +94,17 @@ class Usuario {
   - id : Long
   - login : String
   - senha : String
-  - perfil : String
   + autenticar() : boolean
+}
+
+class Administrador {
+  + cadastrarCompeticao() : void
+  + alocarLocal() : void
+  + gerarRelatorio() : Relatorio
+}
+
+class Arbitro {
+  + registrarResultado(c : Competicao) : void
 }
 
 ' --- Relacionamentos ---
@@ -108,6 +117,11 @@ Competicao "1" -- "0..3" Resultado : possui >
 Resultado "0..*" --> "1" Atleta : conquistado por >
 RelatorioMedalhas ..> Pais : consulta >
 RelatorioMedalhas ..> Resultado : agrega >
+
+' --- Heranca: perfis de usuario do sistema ---
+Usuario <|-- Administrador
+Usuario <|-- Arbitro
+Usuario <|-- Atleta
 
 note bottom of Inscricao
   Restricao (RN2):
